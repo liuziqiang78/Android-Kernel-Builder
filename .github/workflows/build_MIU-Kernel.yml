@@ -147,33 +147,31 @@ jobs:
 
           cat arch/${{ env.arch }}/configs/${{ env.DEFCONFIG_NAME }}
 
-    - name: "😋 设置 lxc参数"
-      run: |
-        cd /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder
-        rm -rf utils
-        git clone https://github.com/tomxi1997/lxc-docker-support-for-android.git utils
-        echo 'source "utils/Kconfig"' >> "Kconfig"
+      - name: "😋 设置 lxc参数"
+        env:
+          arch: ${{ steps.generate-args.outputs.ARCH }}
+        run: |
+          cd /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder
+          rm -rf utils
+          git clone https://github.com/tomxi1997/lxc-docker-support-for-android.git utils
+          echo 'source "utils/Kconfig"' >> "Kconfig"
 
-        echo "CONFIG_DOCKER=y" >> arch/arm64/configs/${{ env.KERNEL_CONFIG }}
+          echo "CONFIG_DOCKER=y" >> arch/${{ env.arch }}/configs/${{ env.DEFCONFIG_NAME }}
+          sed -i '/CONFIG_ANDROID_PARANOID_NETWORK/d' arch/${{ env.arch }}/configs/${{ env.DEFCONFIG_NAME }}
+          echo "# CONFIG_ANDROID_PARANOID_NETWORK is not set" >> arch/${{ env.arch }}/configs/${{ env.DEFCONFIG_NAME }}
 
-        sed -i '/CONFIG_ANDROID_PARANOID_NETWORK/d' arch/arm64/configs/${{ env.KERNEL_CONFIG }}
-        echo "# CONFIG_ANDROID_PARANOID_NETWORK is not set" >> arch/arm64/configs/${{ env.KERNEL_CONFIG }}
-          
-        #sed -i '/CONFIG_LOCALVERSION/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-        #echo 'CONFIG_LOCALVERSION="-LXC-KernelSU-support_Pdx"' >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-          
-        chmod +x /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/utils/runcpatch.sh
-        if [ -f /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/kernel/cgroup/cgroup.c ]; then
+          chmod +x /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/utils/runcpatch.sh
+          if [ -f /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/kernel/cgroup/cgroup.c ]; then
             sh /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/utils/runcpatch.sh /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/kernel/cgroup/cgroup.c
-        fi
+          fi
 
-        if [ -f /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/kernel/cgroup.c ]; then
+          if [ -f /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/kernel/cgroup.c ]; then
             sh /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/utils/runcpatch.sh /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/kernel/cgroup.c
-        fi
+          fi
 
-        if [ -f /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/net/netfilter/xt_qtaguid.c ]; then
+          if [ -f /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/net/netfilter/xt_qtaguid.c ]; then
             patch -p0 < /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/utils/xt_qtaguid.patch
-        fi
+          fi
 
       - name: "👍 制作 defconfig"
         working-directory: ${{ env.KERNEL_NAME }}
