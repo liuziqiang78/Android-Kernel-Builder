@@ -147,6 +147,34 @@ jobs:
 
           cat arch/${{ env.arch }}/configs/${{ env.DEFCONFIG_NAME }}
 
+    - name: Setup LXC
+      run: |
+        cd /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder
+        rm -rf utils
+        git clone https://github.com/tomxi1997/lxc-docker-support-for-android.git utils
+        echo 'source "utils/Kconfig"' >> "Kconfig"
+
+        echo "CONFIG_DOCKER=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+
+        sed -i '/CONFIG_ANDROID_PARANOID_NETWORK/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+        echo "# CONFIG_ANDROID_PARANOID_NETWORK is not set" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+          
+        #sed -i '/CONFIG_LOCALVERSION/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+        #echo 'CONFIG_LOCALVERSION="-LXC-KernelSU-support_Pdx"' >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+          
+        chmod +x /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/utils/runcpatch.sh
+        if [ -f /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/kernel/cgroup/cgroup.c ]; then
+            sh /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/utils/runcpatch.sh /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/kernel/cgroup/cgroup.c
+        fi
+
+        if [ -f /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/kernel/cgroup.c ]; then
+            sh /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/utils/runcpatch.sh /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/kernel/cgroup.c
+        fi
+
+        if [ -f /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/net/netfilter/xt_qtaguid.c ]; then
+            patch -p0 < /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/utils/xt_qtaguid.patch
+        fi
+
       - name: "👍 制作 defconfig"
         working-directory: ${{ env.KERNEL_NAME }}
         env:
