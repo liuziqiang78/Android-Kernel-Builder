@@ -20,13 +20,13 @@ jobs:
       - name: "😄 Checkout"
         uses: actions/checkout@v3
 
-      - name: "😆 Generate Matrix"
+      - name: "😆 生成e Matrix"
         id: generate-matrix
         run: |
           echo "repos<<EOF" >> $GITHUB_OUTPUT
           jq -s '[.[][]]' repos*-MIUI.json >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
-      - name: "⏰ Set builddate"
+      - name: "⏰ 设置构建日期"
         id: generate-builddate
         run: echo "builddate=$(date +'%Y%m%d')" >> $GITHUB_OUTPUT
 
@@ -56,12 +56,12 @@ jobs:
       useAnykernel: ${{ matrix.repos.AnyKernel3.use }}
       release: ${{ matrix.repos.AnyKernel3.release }}
     steps:
-      - name: "⭐ Install prerequisites"
+      - name: "⭐ 安装依赖"
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential bc curl git zip ftp gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi libssl-dev lftp zstd wget libfl-dev python2 python3 libarchive-tools
 
-      - name: "⏰ Setup Anykernel3"
+      - name: "⏰ 设置 Anykernel3"
         env:
           params: "${{ toJSON(matrix.repos.AnyKernel3) }}"
         run: |
@@ -71,13 +71,13 @@ jobs:
 
           echo "🤔 Setup Anykernel3 => ($ANYKERNEL_REPO)"
 
-      - name: "🌟 Clone kernel source => (${{ env.KERNEL_REPO }})"
+      - name: "🌟 克隆内核源 => (${{ env.KERNEL_REPO }})"
         run: |
           git clone --recursive --depth=1 -j $(nproc) --branch $KERNEL_BRANCH $KERNEL_REPO $KERNEL_NAME
 
           echo "🤔 Clone kernel source => ($KERNEL_REPO)"
 
-      - name: "💫 Get toolchains"
+      - name: "💫 获取工具链"
         env:
           toolchains: "${{ toJSON(matrix.repos.toolchains) }}"
         run: |
@@ -96,7 +96,7 @@ jobs:
             done
           done
 
-      - name: "😎 Set args"
+      - name: "😎 设置参数"
         id: generate-args
         env:
           params: "${{ toJSON(matrix.repos.params) }}"
@@ -126,7 +126,7 @@ jobs:
           echo "ARCH=$ARCH" >> $GITHUB_OUTPUT
           echo "args=$args" >> $GITHUB_OUTPUT
 
-      - name: "😋 Update KernelSU"
+      - name: "😋 更新 KernelSU"
         working-directory: ${{ env.KERNEL_NAME }}
         env:
           arch: ${{ steps.generate-args.outputs.ARCH }}
@@ -147,7 +147,7 @@ jobs:
 
           cat arch/${{ env.arch }}/configs/${{ env.DEFCONFIG_NAME }}
 
-      - name: "👍 Make defconfig"
+      - name: "👍 制作 defconfig"
         working-directory: ${{ env.KERNEL_NAME }}
         env:
           args: ${{ steps.generate-args.outputs.args }}
@@ -156,7 +156,7 @@ jobs:
           echo "PATH Variable: $PATH"
           make ${{ env.args }} ${{ env.DEFCONFIG_NAME }}
 
-      - name: "🎶 Build kernel"
+      - name: "🎶 构建内核"
         working-directory: ${{ env.KERNEL_NAME }}
         env:
           args: ${{ steps.generate-args.outputs.args }}
@@ -164,7 +164,7 @@ jobs:
           echo "PATH Variable: $PATH"
           make ${args}
 
-      - name: "💛 Upload Image"
+      - name: "💛 上传 Image"
         uses: actions/upload-artifact@v3
         env:
           arch: ${{ steps.generate-args.outputs.ARCH }}
@@ -174,7 +174,7 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
-      - name: "💙 Upload Image.gz"
+      - name: "💙 上传 Image.gz"
         uses: actions/upload-artifact@v3
         env:
           arch: ${{ steps.generate-args.outputs.ARCH }}
@@ -184,7 +184,7 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
-      - name: "💜 Upload dtb"
+      - name: "💜 上传 dtb"
         uses: actions/upload-artifact@v3
         env:
           arch: ${{ steps.generate-args.outputs.ARCH }}
@@ -194,7 +194,7 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
-      - name: "❤️ Upload dtbo.img"
+      - name: "❤️ 上传 dtbo.img"
         uses: actions/upload-artifact@v3
         env:
           arch: ${{ steps.generate-args.outputs.ARCH }}
@@ -204,7 +204,7 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
-      - name: "❤️ Pack AnyKernel3.zip"
+      - name: "❤️ 打包  AnyKernel3.zip"
         if: ${{ env.useAnykernel == 'true' }}
         env:
           arch: ${{ steps.generate-args.outputs.ARCH }}
@@ -219,14 +219,14 @@ jobs:
           cd AnyKernel3/
           zip -q -r "${{ env.anykernel }}.zip" *
 
-      - name: "💾 Upload AnyKernel3 image => (${{ env.builddate }})"
+      - name: "💾 上传 AnyKernel3 image => (${{ env.builddate }})"
         uses: actions/upload-artifact@v3
         if: ${{ env.useAnykernel == 'true' }}
         with:
           name: "${{ env.KERNEL_DEVICE }}-${{ env.KERNEL_NAME }}_${{ env.builddate }}"
           path: AnyKernel3/*
 
-      - name: 🧧 Create GitHub Release => (${{ env.builddate }})
+      - name: 🧧 创建 GitHub 发布 => (${{ env.builddate }})
         continue-on-error: true
         uses: softprops/action-gh-release@v1
         if: ${{ env.useAnykernel == 'true' && env.release == 'true' }}
