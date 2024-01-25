@@ -147,7 +147,7 @@ jobs:
 
           cat arch/${{ env.arch }}/configs/${{ env.DEFCONFIG_NAME }}
 
-    - name: Setup LXC
+    - name: "😋 设置 lxc参数"
       run: |
         cd /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder
         rm -rf utils
