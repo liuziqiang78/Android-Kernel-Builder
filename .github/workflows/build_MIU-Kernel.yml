@@ -151,7 +151,10 @@ jobs:
         env:
           arch: ${{ steps.generate-args.outputs.ARCH }}
         run:
+          cd /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder
+          rm -rf utils
           git clone https://github.com/tomxi1997/lxc-docker-support-for-android.git utils
+          cd /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder
           echo 'source "utils/Kconfig"' >> "Kconfig"
           echo "CONFIG_DOCKER=y" >> arch/${{ env.arch }}/configs/${{ env.DEFCONFIG_NAME }}
           sed -i '/CONFIG_ANDROID_PARANOID_NETWORK/d' arch/${{ env.arch }}/configs/${{ env.DEFCONFIG_NAME }}
