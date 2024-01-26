@@ -153,20 +153,18 @@ jobs:
         run:
           git clone https://github.com/tomxi1997/lxc-docker-support-for-android.git utils
           echo 'source "utils/Kconfig"' >> "Kconfig"
-
           echo "CONFIG_DOCKER=y" >> arch/${{ env.arch }}/configs/${{ env.DEFCONFIG_NAME }}
           sed -i '/CONFIG_ANDROID_PARANOID_NETWORK/d' arch/${{ env.arch }}/configs/${{ env.DEFCONFIG_NAME }}
           echo "# CONFIG_ANDROID_PARANOID_NETWORK is not set" >> arch/${{ env.arch }}/configs/${{ env.DEFCONFIG_NAME }}
-
           chmod +x /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/utils/runcpatch.sh
           if [ -f /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/kernel/cgroup/cgroup.c ]; then
             sh /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/utils/runcpatch.sh /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/kernel/cgroup/cgroup.c
           fi
-
+          
           if [ -f /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/kernel/cgroup.c ]; then
             sh /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/utils/runcpatch.sh /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/kernel/cgroup.c
           fi
-
+          
           if [ -f /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/net/netfilter/xt_qtaguid.c ]; then
             patch -p0 < /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder/utils/xt_qtaguid.patch
           fi
