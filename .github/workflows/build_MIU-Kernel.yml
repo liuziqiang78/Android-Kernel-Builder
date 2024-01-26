@@ -150,9 +150,7 @@ jobs:
       - name: "😋 设置 lxc参数"
         env:
           arch: ${{ steps.generate-args.outputs.ARCH }}
-        run: |
-          cd /home/runner/work/Android-Kernel-Builder/Android-Kernel-Builder
-          rm -rf utils
+        run:
           git clone https://github.com/tomxi1997/lxc-docker-support-for-android.git utils
           echo 'source "utils/Kconfig"' >> "Kconfig"
 
